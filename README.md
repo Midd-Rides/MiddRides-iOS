@@ -1,1 +1,2 @@
-# middrides_iOS
+# MiddRides-iOS
+iOS Client for MiddRides
