@@ -16,9 +16,9 @@ class LocationStatus: NSObject, NSCoding {
     var latestLocVersion: Int
     var vanStops : [String]
     
-    static let DocumentsDirectory = NSFileManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-    static let archiveLocStatusURL = DocumentsDirectory.URLByAppendingPathComponent("locVersion")
-    static let archiveVanStopsURL = DocumentsDirectory.URLByAppendingPathComponent("vStops")
+    static let DocumentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
+    static let archiveLocStatusURL = DocumentsDirectory.appendingPathComponent("locVersion")
+    static let archiveVanStopsURL = DocumentsDirectory.appendingPathComponent("vStops")
     
     // MARK: Initialization
     
@@ -30,22 +30,22 @@ class LocationStatus: NSObject, NSCoding {
     // MARK: NSCoding requriements
     
     required convenience init?(coder aDecoder: NSCoder) {
-        let currentVersion = aDecoder.decodeObjectForKey("latestLocVersion") as! Int;
-        let currentStops = aDecoder.decodeObjectForKey("vanStops") as! [String];
+        let currentVersion = aDecoder.decodeObject(forKey: "latestLocVersion") as! Int;
+        let currentStops = aDecoder.decodeObject(forKey: "vanStops") as! [String];
         self.init(latestLocVersion: currentVersion, vanStops: currentStops);
     }
     
-    func encodeWithCoder(aCoder: NSCoder){
-        aCoder.encodeInteger(self.latestLocVersion, forKey: "latestLocVersion")
-        aCoder.encodeObject(self.vanStops, forKey: "vanStops")
+    func encode(with aCoder: NSCoder){
+        aCoder.encode(self.latestLocVersion, forKey: "latestLocVersion")
+        aCoder.encode(self.vanStops, forKey: "vanStops")
         
     }
     
     //MARK: NSCoding
     
     func saveData(){
-        let isSuccessfulSave1 = NSKeyedArchiver.archiveRootObject(self.latestLocVersion, toFile: LocationStatus.archiveLocStatusURL.path!)
-        let isSuccessfulSave2 = NSKeyedArchiver.archiveRootObject(self.vanStops, toFile: LocationStatus.archiveVanStopsURL.path!)
+        let isSuccessfulSave1 = NSKeyedArchiver.archiveRootObject(self.latestLocVersion, toFile: LocationStatus.archiveLocStatusURL.path)
+        let isSuccessfulSave2 = NSKeyedArchiver.archiveRootObject(self.vanStops, toFile: LocationStatus.archiveVanStopsURL.path)
         if (!isSuccessfulSave1 || !isSuccessfulSave2){
             print("Save failed")
         }
@@ -53,8 +53,8 @@ class LocationStatus: NSObject, NSCoding {
     
     func loadData() -> (locStatus: Int, stops: [String]) {
 
-        if let savedLocStatus = NSKeyedUnarchiver.unarchiveObjectWithFile(LocationStatus.archiveLocStatusURL.path!) as? Int {
-            if let savedStops = NSKeyedUnarchiver.unarchiveObjectWithFile(LocationStatus.archiveVanStopsURL.path!) as? [String]{
+        if let savedLocStatus = NSKeyedUnarchiver.unarchiveObject(withFile: LocationStatus.archiveLocStatusURL.path) as? Int {
+            if let savedStops = NSKeyedUnarchiver.unarchiveObject(withFile: LocationStatus.archiveVanStopsURL.path) as? [String]{
                 return (savedLocStatus, savedStops)
             } else {
                 return (savedLocStatus, [String]())
@@ -65,11 +65,11 @@ class LocationStatus: NSObject, NSCoding {
     }
     
     // MARK: Instance Methods
-    func setVersion (version: Int) {
+    func setVersion (_ version: Int) {
         self.latestLocVersion = version;
     }
     
-    func changeVanStops (stops: [String]) {
+    func changeVanStops (_ stops: [String]) {
         self.vanStops = stops;
     }
     

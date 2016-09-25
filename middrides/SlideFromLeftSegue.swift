@@ -13,30 +13,30 @@ class SlideFromLeftSegue: UIStoryboardSegue {
     // ----- copied from http://www.appcoda.com/custom-segue-animations/ ----
     override func perform() {
         // Assign the source and destination views to local variables.
-        let firstVCView = self.sourceViewController.view as UIView!
-        let secondVCView = self.destinationViewController.view as UIView!
+        let firstVCView = self.source.view as UIView!
+        let secondVCView = self.destination.view as UIView!
         
         // Get the screen width and height.
-        let screenWidth = UIScreen.mainScreen().bounds.size.width
-        let screenHeight = UIScreen.mainScreen().bounds.size.height
+        let screenWidth = UIScreen.main.bounds.size.width
+        let screenHeight = UIScreen.main.bounds.size.height
         
         // Specify the initial position of the destination view.
-        secondVCView.frame = CGRectMake(-screenWidth, 0, screenWidth, screenHeight)
+        secondVCView?.frame = CGRect(x: -screenWidth, y: 0, width: screenWidth, height: screenHeight)
         
         // Access the app's key window and insert the destination view above the current (source) one.
-        let window = UIApplication.sharedApplication().keyWindow
-        window?.insertSubview(secondVCView, aboveSubview: firstVCView)
+        let window = UIApplication.shared.keyWindow
+        window?.insertSubview(secondVCView!, aboveSubview: firstVCView!)
         
         // Animate the transition.
-        UIView.animateWithDuration(0.4, animations: { () -> Void in
-            firstVCView.frame = CGRectMake(screenWidth, 0, screenWidth, screenHeight)
-            secondVCView.frame = CGRectMake(0, 0, screenWidth, screenHeight)
+        UIView.animate(withDuration: 0.4, animations: { () -> Void in
+            firstVCView?.frame = CGRect(x: screenWidth, y: 0, width: screenWidth, height: screenHeight)
+            secondVCView?.frame = CGRect(x: 0, y: 0, width: screenWidth, height: screenHeight)
             
-            }) { (Finished) -> Void in
-                self.sourceViewController.presentViewController(self.destinationViewController as UIViewController,
+            }, completion: { (Finished) -> Void in
+                self.source.present(self.destination as UIViewController,
                     animated: false,
                     completion: nil)
-        }
+        }) 
     }
 }
 

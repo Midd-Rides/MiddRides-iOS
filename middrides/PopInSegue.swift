@@ -12,29 +12,29 @@ class PopInSegue: UIStoryboardSegue {
     
     // ----- copied from http://www.appcoda.com/custom-segue-animations/ ----
     override func perform() {
-        let firstVCView = sourceViewController.view as UIView!
-        let thirdVCView = destinationViewController.view as UIView!
+        let firstVCView = source.view as UIView!
+        let thirdVCView = destination.view as UIView!
         
-        let window = UIApplication.sharedApplication().keyWindow
-        window?.insertSubview(thirdVCView, belowSubview: firstVCView)
+        let window = UIApplication.shared.keyWindow
+        window?.insertSubview(thirdVCView!, belowSubview: firstVCView!)
         
-        thirdVCView.transform = CGAffineTransformScale(thirdVCView.transform, 0.001, 0.001)
+        thirdVCView?.transform = (thirdVCView?.transform.scaledBy(x: 0.001, y: 0.001))!
         
-        UIView.animateWithDuration(0.5, animations: { () -> Void in
+        UIView.animate(withDuration: 0.5, animations: { () -> Void in
             
-            firstVCView.transform = CGAffineTransformScale(thirdVCView.transform, 0.001, 0.001)
+            firstVCView?.transform = (thirdVCView?.transform.scaledBy(x: 0.001, y: 0.001))!
             
-            }) { (Finished) -> Void in
+            }, completion: { (Finished) -> Void in
                 
-                UIView.animateWithDuration(0.5, animations: { () -> Void in
-                    thirdVCView.transform = CGAffineTransformIdentity
+                UIView.animate(withDuration: 0.5, animations: { () -> Void in
+                    thirdVCView?.transform = CGAffineTransform.identity
                     
                     }, completion: { (Finished) -> Void in
                         
-                        firstVCView.transform = CGAffineTransformIdentity
-                        self.sourceViewController.presentViewController(self.destinationViewController as UIViewController, animated: false, completion: nil)
+                        firstVCView?.transform = CGAffineTransform.identity
+                        self.source.present(self.destination as UIViewController, animated: false, completion: nil)
                 })
-        }
+        }) 
     }
 
 }

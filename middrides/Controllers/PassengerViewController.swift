@@ -13,7 +13,7 @@ class PassengerViewController: UIViewController, UIPickerViewDataSource, UIPicke
 
     @IBOutlet weak var LocationPickerView: UIPickerView!
     
-    @IBAction func RequestButtonHandler(sender: AnyObject) {
+    @IBAction func RequestButtonHandler(_ sender: AnyObject) {
         handleVanRequest()
     }
     
@@ -39,35 +39,35 @@ class PassengerViewController: UIViewController, UIPickerViewDataSource, UIPicke
     //TODO: REFACTOR TO NOT USE GLOBAL VARIABLS
     func handleVanRequest() -> Void {
         
-        let index = LocationPickerView.selectedRowInComponent(0)
+        let index = LocationPickerView.selectedRow(inComponent: 0)
         let locationName = rideLocations[index]
         req["pickUpLocation"] = rideLocations[index]
         let locationId = rideLocationIDs[index]
         req["locationId"] = locationId
-        req["userId"] = PFUser.currentUser()?.objectId
-        req["email"] = PFUser.currentUser()?.email
+        req["userId"] = PFUser.current()?.objectId
+        req["email"] = PFUser.current()?.email
         
         // Save the stop name locally
-        NSUserDefaults.standardUserDefaults().setObject(locationName, forKey: "pendingRequestLocation");
+        UserDefaults.standard.set(locationName, forKey: "pendingRequestLocation");
         
         //Subscribe to the Parse push notification channel related to this location.
         var channelName = self.rideLocations[index]
-        channelName = channelName.stringByReplacingOccurrencesOfString(" ", withString: "-")
-        channelName = channelName.stringByReplacingOccurrencesOfString("/", withString: "-")
+        channelName = channelName.replacingOccurrences(of: " ", with: "-")
+        channelName = channelName.replacingOccurrences(of: "/", with: "-")
 
-        req.saveInBackgroundWithBlock{
-            (success: Bool, error: NSError?) -> Void in
+        req.saveInBackground{
+            (success: Bool, error: Error?) -> Void in
             if (success) {
-                NSUserDefaults.standardUserDefaults().setObject(NSDate(timeIntervalSinceNow: 0), forKey: "dateSinceLastRequest")
+                UserDefaults.standard.set(Date(timeIntervalSinceNow: 0), forKey: "dateSinceLastRequest")
                 print(channelName)
-                PFPush.subscribeToChannelInBackground(channelName)
+                PFPush.subscribeToChannel(inBackground: channelName)
                 
             } else {
                 // There was a problem, check error.description
                 print("Error in sending Request")
             }
         }
-        if let user = PFUser.currentUser() {
+        if let user = PFUser.current() {
             print("pendingRequest in passneger view controller");
             user["pendingRequest"] = true
             user.saveInBackground()
@@ -76,7 +76,7 @@ class PassengerViewController: UIViewController, UIPickerViewDataSource, UIPicke
         //update Parse LocationStatus
         let query = PFQuery(className: "LocationStatus")
         query.whereKey("name", equalTo: locationName)
-            query.findObjectsInBackgroundWithBlock() { (objects: [PFObject]?, error: NSError?) -> Void in
+            query.findObjectsInBackground() { (objects: [PFObject]?, error: Error?) -> Void in
                 if let unwrappedObjects = objects {
                     let numPassengers = unwrappedObjects[0]["passengersWaiting"] as! Int
                     unwrappedObjects[0]["passengersWaiting"] = numPassengers + 1;
@@ -93,11 +93,11 @@ class PassengerViewController: UIViewController, UIPickerViewDataSource, UIPicke
     
     
     //MARK: Data Sources
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return rideLocations.count
     }
     
@@ -106,8 +106,8 @@ class PassengerViewController: UIViewController, UIPickerViewDataSource, UIPicke
 //        return rideLocations[row]
 //    }
     
-    func pickerView(pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
-        return NSAttributedString(string: rideLocations[row], attributes: [NSForegroundColorAttributeName: UIColor.whiteColor()])
+    func pickerView(_ pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
+        return NSAttributedString(string: rideLocations[row], attributes: [NSForegroundColorAttributeName: UIColor.white])
         
     }
     
