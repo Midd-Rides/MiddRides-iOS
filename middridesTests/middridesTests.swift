@@ -29,7 +29,7 @@ class middridesTests: XCTestCase {
     
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }
@@ -37,21 +37,21 @@ class middridesTests: XCTestCase {
     //Unit Tests:
     func testRegistration(){
         let rView = RegisterViewController();
-        XCTAssert(rView.validRegisterDetails("", password: "") == false, "Registration validity check fails");
-        XCTAssert(rView.validRegisterDetails("ab@middlebury.ed", password: "abcdefg") == false, "Registration   validity check fails");
-        XCTAssert(rView.validRegisterDetails("ab@middlebury.edu", password: "") == false, "Registration validity check fails");
-        XCTAssert(rView.validRegisterDetails("ab@middlebury.edu", password: "abcdef") == true, "Registration validity check fails");
+        XCTAssert(rView.validRegisterDetails("", password: "", confirm: "") == false, "Registration validity check fails")
+        XCTAssert(rView.validRegisterDetails("ab@middlebury.ed", password: "abcdefg", confirm: "abcdefg") == false, "Registration   validity check fails")
+        XCTAssert(rView.validRegisterDetails("ab@middlebury.edu", password: "", confirm: "") == false, "Registration validity check fails")
+        XCTAssert(rView.validRegisterDetails("ab@middlebury.edu", password: "abcdef", confirm: "abcdef") == true, "Registration validity check fails")
     }
     
     func testLogin(){
         let lView = LoginViewController();
-        XCTAssert(lView.validateLoginCredentials("", password: "") == .Invalid, "Registration validity check fails");
-        XCTAssert(lView.validateLoginCredentials("ab@middlebury.ed", password: "abcdefg") == .Invalid, "Registration validity check fails");
-        XCTAssert(lView.validateLoginCredentials("ab@middlebury.edu", password: "") == .Invalid, "Registration validity check fails");
-        XCTAssert(lView.validateLoginCredentials("ab@middlebury.edu", password: "abcdefg") == .User, "Registration validity check fails");
-        XCTAssert(lView.validateLoginCredentials("ab@middlebury.edu", password: "abc265/#g") == .User, "Registration validity check fails");
-        XCTAssert(lView.validateLoginCredentials("cd@middlebury.edu", password: "abc265/#g") == .User, "Registration validity check fails");
-        XCTAssert(lView.validateLoginCredentials("ab@middlebury.edu", password: "abcabc") == .User, "Registration validity check fails");
+        XCTAssert(lView.validateLoginCredentials("", password: "") == .invalid, "Registration validity check fails")
+        XCTAssert(lView.validateLoginCredentials("ab@middlebury.ed", password: "abcdefg") == .invalid, "Registration validity check fails")
+        XCTAssert(lView.validateLoginCredentials("ab@middlebury.edu", password: "") == .invalid, "Registration validity check fails")
+        XCTAssert(lView.validateLoginCredentials("ab@middlebury.edu", password: "abcdefg") == .user, "Registration validity check fails")
+        XCTAssert(lView.validateLoginCredentials("ab@middlebury.edu", password: "abc265/#g") == .user, "Registration validity check fails")
+        XCTAssert(lView.validateLoginCredentials("cd@middlebury.edu", password: "abc265/#g") == .user, "Registration validity check fails")
+        XCTAssert(lView.validateLoginCredentials("ab@middlebury.edu", password: "abcabc") == .user, "Registration validity check fails")
         //TODO: need to test the actual process of Parse checking the username/password
         //Need to try a login that is valid in terms of syntax but has wrong password
         
@@ -66,8 +66,8 @@ class middridesTests: XCTestCase {
         } catch _ {
             XCTAssert(false)
         }
-        let vrView = VanRequestViewController()
-        vrView.requestButtonPressed(UIButton())
+        let vrView = UserViewController()
+        vrView.requestVanButtonPressed(UIButton())
         sleep(1) // wait for asynchronous part of requestButtonPressed() to finish
         var newCount = -1
         do {

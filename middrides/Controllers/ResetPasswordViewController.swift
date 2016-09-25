@@ -8,6 +8,26 @@
 
 import Parse
 import UIKit
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+fileprivate func <= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l <= r
+  default:
+    return !(rhs < lhs)
+  }
+}
+
 
 class ResetPasswordViewController: UIViewController, UITextFieldDelegate {
 
@@ -26,7 +46,7 @@ class ResetPasswordViewController: UIViewController, UITextFieldDelegate {
         
         // Do any additional setup after loading the view.
         emailTextField?.delegate = self;
-        emailTextField?.autocorrectionType = .No;
+        emailTextField?.autocorrectionType = .no;
     }
 
     override func didReceiveMemoryWarning() {
@@ -34,7 +54,7 @@ class ResetPasswordViewController: UIViewController, UITextFieldDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func resetButtonPressed(sender: UIButton) {
+    @IBAction func resetButtonPressed(_ sender: UIButton) {
         // If not connected to internet, inform user and do not attempt to reset
         if (!Connectivity.isConnectedToNetwork()){
             self.displayPopUpMessage("No Internet", message: noInternetMessage);
@@ -54,8 +74,8 @@ class ResetPasswordViewController: UIViewController, UITextFieldDelegate {
         var query = PFUser.query();
         query?.whereKey("email", equalTo: email!);
         
-        query?.findObjectsInBackgroundWithBlock {
-            (objects: [PFObject]?, error: NSError?) -> Void in
+        query?.findObjectsInBackground {
+            (objects: [PFObject]?, error: Error?) -> Void in
             
             if (error == nil){
                 print("no error");
@@ -63,16 +83,16 @@ class ResetPasswordViewController: UIViewController, UITextFieldDelegate {
                 if let results = objects {
                     if (results.count > 0){
                         
-                        PFUser.requestPasswordResetForEmailInBackground(email!);
+                        PFUser.requestPasswordResetForEmail(inBackground: email!);
                         
-                        if let user = PFUser.currentUser(){
+                        if let user = PFUser.current(){
                             PFUser.logOutInBackground();
                         }
                         
                         self.displayPopUpMessageWithBlock("Reset Email Sent", message: self.resetEmailSentMessage, completionBlock: {
                             (alertAction) -> Void in
                             
-                            self.performSegueWithIdentifier("resetPasswordViewToLoginView", sender: self)
+                            self.performSegue(withIdentifier: "resetPasswordViewToLoginView", sender: self)
                         });
 
                     } else{

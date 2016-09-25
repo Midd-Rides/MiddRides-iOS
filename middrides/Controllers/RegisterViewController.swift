@@ -16,7 +16,7 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var ConfirmPassword: UITextField!
     @IBOutlet weak var letsRideButton: UIButton!
     
-    func setInfo(username: String, password: String){
+    func setInfo(_ username: String, password: String){
         self.Username.text = username;
         self.Password.text = password;
     }
@@ -26,9 +26,9 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         Username.delegate = self;
         Password.delegate = self;
         ConfirmPassword.delegate = self;        
-        Username.autocorrectionType = .No;
-        Password.autocorrectionType = .No;
-        ConfirmPassword.autocorrectionType = .No;
+        Username.autocorrectionType = .no;
+        Password.autocorrectionType = .no;
+        ConfirmPassword.autocorrectionType = .no;
 
     }
 
@@ -37,13 +37,13 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         registerButtonPressed(letsRideButton)
         
         return true
     }
     
-    @IBAction func registerButtonPressed(sender: UIButton) {
+    @IBAction func registerButtonPressed(_ sender: UIButton) {
         
         if validRegisterDetails((self.Username?.text)!, password: (self.Password?.text)!, confirm: (self.ConfirmPassword.text)!) {
             //check that username and password are valid
@@ -54,19 +54,17 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
             user.password = self.Password.text!;
             user.email = self.Username.text!;
             
-            user.signUpInBackgroundWithBlock {
-                (succeeded: Bool, error: NSError?) -> Void in
+            user.signUpInBackground {
+                (succeeded: Bool, error: Error?) -> Void in
                 if let error = error {
-                    if let errorString = error.userInfo["error"] as? NSString {
-                        self.displayPopUpMessage("Error", message: errorString as String)
-                        print(errorString)
-                    }
+                    self.displayPopUpMessage("Error", message: error.localizedDescription)
+                    print(error.localizedDescription)
                 }else{
                     //Display a success message. Once user clicks 'ok', take them to login view.
                     self.displayPopUpMessageWithBlock("Registration success!", message: "You successfully registered for MiddRides! Please verify your email to use the app!", completionBlock: {
                             (alertAction) -> Void in
                         
-                            self.performSegueWithIdentifier("registerViewToLoginView", sender: self)
+                            self.performSegue(withIdentifier: "registerViewToLoginView", sender: self)
                         });
                 }
             }
@@ -77,7 +75,7 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     }
     
     //verify register credentials
-    func validRegisterDetails(username: String, password: String, confirm: String) -> Bool {
+    func validRegisterDetails(_ username: String, password: String, confirm: String) -> Bool {
         
         if ((username.hasSuffix("@middlebury.edu")) == false){
             //make sure we have a valid email
@@ -100,7 +98,7 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     }
     
     // Hide keyboard
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true);
     }
     /*

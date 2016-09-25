@@ -7,9 +7,9 @@
 //
 
 enum LoginType {
-    case User
-    case Dispatcher
-    case Invalid
+    case user
+    case dispatcher
+    case invalid
 }
 
 import UIKit
@@ -18,16 +18,16 @@ import Bolts
 
 // Extend all UIViewControllers so that they now contain this method
 extension UIViewController {
-    func displayPopUpMessage(title: String, message: String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Cancel, handler: nil))
-        self.presentViewController(alertController, animated: false, completion: nil)
+    func displayPopUpMessage(_ title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.cancel, handler: nil))
+        self.present(alertController, animated: false, completion: nil)
     }
     
-    func displayPopUpMessageWithBlock(title: String, message: String, completionBlock:((UIAlertAction) -> Void)?) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Cancel, handler: completionBlock))
-        self.presentViewController(alertController, animated: false, completion:nil)
+    func displayPopUpMessageWithBlock(_ title: String, message: String, completionBlock:((UIAlertAction) -> Void)?) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.cancel, handler: completionBlock))
+        self.present(alertController, animated: false, completion:nil)
     }
 }
 
@@ -43,35 +43,35 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         Username.delegate = self
         
         // Disable autocorrect/autosuggest
-        Username.autocorrectionType = .No;
-        Password.autocorrectionType = .No;
+        Username.autocorrectionType = .no;
+        Password.autocorrectionType = .no;
         
         // Synchronize user information from the server. If an error occurs, use
         // the user info stored locally.
         let curUser:PFUser?;
         do{
             print("fetched user from DB")
-            curUser = try PFUser.currentUser()?.fetch();
+            curUser = try PFUser.current()?.fetch();
         }catch{
             print("fetching user from db failed. using cached user info");
-            curUser = PFUser.currentUser();
+            curUser = PFUser.current();
         }
         
         if curUser != nil{
             if (curUser!.username == "dispatcher@middlebury.edu"){
-                self.performSegueWithIdentifier("loginViewToDispatcherView", sender: self)
+                self.performSegue(withIdentifier: "loginViewToDispatcherView", sender: self)
             } else {
                 //if user
                 if checkAnnouncement() {
-                    self.performSegueWithIdentifier("loginViewToAnnouncementView", sender: self)
+                    self.performSegue(withIdentifier: "loginViewToAnnouncementView", sender: self)
                 } else {
-                    dispatch_async(dispatch_get_main_queue()) {
+                    DispatchQueue.main.async {
                         /*solution from stackOverflow answer at http://stackoverflow.com/questions/24982722/performseguewithidentifier-does-not-work
                         */
                         
                         // If the user has verified their email then log them in.
                         if(curUser!["emailVerified"] as! Bool){
-                            self.performSegueWithIdentifier("loginViewToUserView", sender: self);
+                            self.performSegue(withIdentifier: "loginViewToUserView", sender: self);
                         }else{
                             //If not verified, do nothing.
                         }
@@ -87,21 +87,21 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         loginButtonPressed(letsRideButton)
         
         return true
     }
     
-    @IBAction func loginButtonPressed(sender: UIButton) {
+    @IBAction func loginButtonPressed(_ sender: UIButton) {
         var login = validateLoginCredentials(self.Username.text!, password: self.Password.text!)
-        PFUser.logInWithUsernameInBackground(self.Username.text!, password: self.Password.text!) {
-            (user: PFUser?, error: NSError?) -> Void in
+        PFUser.logInWithUsername(inBackground: self.Username.text!, password: self.Password.text!) {
+            (user: PFUser?, error: Error?) -> Void in
             if user == nil {
-                login = .Invalid;
+                login = .invalid;
             }
             switch login{
-            case .User:
+            case .user:
                 guard let unwrappedUser = user else {
                     print("ERROR: NO USER")
                     return
@@ -110,9 +110,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 let emailVerified = unwrappedUser["emailVerified"] as! Bool
                 if emailVerified {
                     if self.checkAnnouncement() {
-                        self.performSegueWithIdentifier("loginViewToAnnouncementView", sender: self)
+                        self.performSegue(withIdentifier: "loginViewToAnnouncementView", sender: self)
                     } else {
-                        self.performSegueWithIdentifier("loginViewToUserView", sender: self)
+                        self.performSegue(withIdentifier: "loginViewToUserView", sender: self)
                     }
                 }
                 else {
@@ -120,10 +120,10 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     self.displayPopUpMessage("Error", message: "Email not verified")
                 }
                 
-            case .Dispatcher:
-                self.performSegueWithIdentifier("loginViewToDispatcherView", sender: self)
+            case .dispatcher:
+                self.performSegue(withIdentifier: "loginViewToDispatcherView", sender: self)
                 
-            case .Invalid:
+            case .invalid:
                 //display invalid login message
                 print("invalid login, username: " + self.Username.text! + " password: " + self.Password.text!)
                 self.displayPopUpMessage("Error", message: "Invalid username or password")
@@ -133,35 +133,35 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         
     }
     
-    @IBAction func registerButtonPressed(sender: UIButton) {
+    @IBAction func registerButtonPressed(_ sender: UIButton) {
         print("register button pressed")
     }
     
     
     
-    func validateLoginCredentials(username: String, password: String) -> LoginType {
+    func validateLoginCredentials(_ username: String, password: String) -> LoginType {
         
         if (username.characters.count <= 15){
             //make sure there username contains string + '@middlebury.edu'
-            return .Invalid;
+            return .invalid;
         }
         if ((username.hasSuffix("@middlebury.edu")) == false){
             //make sure we have a valid email
-            return .Invalid;
+            return .invalid;
         }
         
         if (password.characters.count < 6){
             //make sure there are 6 characters in a password
-            return .Invalid;
+            return .invalid;
         }
         
         
         //TODO: change dispatcher email?
         if (username == "dispatcher@middlebury.edu"){
-            return .Dispatcher;
+            return .dispatcher;
         }
 
-        return .User;
+        return .user;
 
     }
     
@@ -169,7 +169,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         return false
     }
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         // Causes the view (or one of its embedded text fields) to resign the first responder status
         // i.e: hide the keyboard
         self.view.endEditing(true);
